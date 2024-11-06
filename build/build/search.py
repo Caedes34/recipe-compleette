@@ -8,6 +8,7 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, Label, Toplevel
 # Constants for recipe image dimensions
 RECIPE_IMAGE_WIDTH = 200
 RECIPE_IMAGE_HEIGHT = 200
+image_url = "" 
 
 class RecipeApp:
     def __init__(self, recipe_app_key):
@@ -46,7 +47,7 @@ class RecipeApp:
         self.search_entry.place(x=140.0, y=262.0, width=464.0, height=36.0)
 
         # Search button
-        self.button_image_1 = PhotoImage(file=relative_to_assets("button_1.png"))
+        self.button_image_1 = PhotoImage(file=relative_to_assets("button_7.png"))
         self.search_button = Button(
             self.main_window,
             image=self.button_image_1,
@@ -55,7 +56,7 @@ class RecipeApp:
             command=self.__run_search_query,
             relief="flat"
         )
-        self.search_button.place(x=581.0, y=262.0, width=42.0, height=38.0)
+        self.search_button.place(x=578.0, y=262.0, width=42.0, height=35.5)
 
     def __run_search_query(self):
         query = self.search_entry.get()
@@ -111,9 +112,9 @@ class RecipeApp:
 
             no_recipe_label = Label(content_frame, text=message, bg="#3E2929", fg="white")
             no_recipe_label.grid(column=1, row=4, pady=10)
-            no_recipe_image = PhotoImage(file="path/to/your/image.png")  # Replace with your image path
-            no_recipe_image_label = Label(content_frame, image=no_recipe_image)
-            no_recipe_image_label.grid(column=1, row=5, pady=10)
+
+    # Keep a reference to the image to prevent it from being garbage-collected
+            no_recipe_image_label.image = no_recipe_image
 
             # Display an image if no recipe is found (you can use a placeholder image)
             placeholder_image_url = "https://www.creta-gel.com/page-404.html"  # Replace with your placeholder image URL
@@ -172,7 +173,7 @@ class RecipeApp:
 
 # Helper function to manage asset paths
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\Admin\Downloads\Tkinter-Designer-master\build\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\Admin\Downloads\recipe-compleette-main\build\assets\frame0")
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
