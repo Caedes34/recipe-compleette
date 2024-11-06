@@ -106,13 +106,19 @@ class RecipeApp(object):
         if recipe is None:
             ingredients_text.insert(tk.END, "No Recipe found for search criteria")
             return
-
-        ingredients_text.insert(tk.END, "\n" + recipe['title'] + "\n")
+        else:
+            ingredients_text.insert(tk.END, "\n" + recipe['title'] + "\n")
+            ingredients_text.insert(tk.END, "\n" + f"Servings:{recipe['servings']}\n")
+            ingredients_text.insert(tk.END, "\n" + f"Ready in:{recipe['readyInMinutes']}\n")     
+            
+        
 
         # For the ingredients, we use the `extendedIngredients` field
         if 'extendedIngredients' in recipe:
             for ingredient in recipe['extendedIngredients']:
-                ingredients_text.insert(tk.END, "\n- " + ingredient['name'])
+
+                ingredients_text.insert(tk.END, "\n- " + ingredient['original'])
+                
 
     def run_app(self):
         self.window.mainloop()
