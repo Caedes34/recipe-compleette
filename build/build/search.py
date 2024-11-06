@@ -3,7 +3,7 @@ import webbrowser
 from io import BytesIO
 from PIL import Image, ImageTk
 from pathlib import Path
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, Label, Toplevel
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, Label, Toplevel, Scrollbar, Frame
 
 # Constants for recipe image dimensions
 RECIPE_IMAGE_WIDTH = 200
@@ -70,29 +70,58 @@ class RecipeApp:
     def __open_results_window(self, recipe, message=""):
         # Create a new result window
         result_window = Toplevel(self.main_window)
-        result_window.geometry("1441x2237")
+        result_window.geometry("1441x800")
         result_window.configure(bg="#3E2929")
-        
+
+        # Create a frame and canvas for scrolling
+        frame = Frame(result_window)
+        frame.pack(fill="both", expand=True)
+
+        canvas = Canvas(frame, bg="#3E2929", bd=0, highlightthickness=0, relief="ridge")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        scrollbar = Scrollbar(frame, orient="vertical", command=canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+
+        canvas.config(yscrollcommand=scrollbar.set)
+
+        # Create a frame inside the canvas to hold the recipe content
+        content_frame = Frame(canvas, bg="#3E2929")
+        canvas.create_window((0, 0), window=content_frame, anchor="nw")
+
+        # Add recipe content to the canvas
         if recipe:
             recipe_image = recipe['image']
             recipe_url = recipe.get('sourceUrl', "")
 
             # Display recipe image
-            self.__show_image(result_window, recipe_image)
+            self.__show_image(content_frame, recipe_image)
 
             # Display ingredients and recipe details
-            self.__get_ingredients(result_window, recipe)
+            self.__get_ingredients(content_frame, recipe)
             
             # Recipe link button
             def __open_link():
                 if recipe_url:
                     webbrowser.open(recipe_url)
-            recipe_button = Button(result_window, text="Recipe Link", highlightbackground="#ea86b6", command=__open_link)
+            recipe_button = Button(content_frame, text="Recipe Link", highlightbackground="#ea86b6", command=__open_link)
             recipe_button.grid(column=1, row=7, pady=10)
         else:
             # Display message if no recipe is found
-            no_recipe_label = Label(result_window, text=message, bg="#3E2929", fg="white")
+
+            no_recipe_label = Label(content_frame, text=message, bg="#3E2929", fg="white")
             no_recipe_label.grid(column=1, row=4, pady=10)
+            no_recipe_image = PhotoImage(file="path/to/your/image.png")  # Replace with your image path
+            no_recipe_image_label = Label(content_frame, image=no_recipe_image)
+            no_recipe_image_label.grid(column=1, row=5, pady=10)
+
+            # Display an image if no recipe is found (you can use a placeholder image)
+            placeholder_image_url = "https://www.creta-gel.com/page-404.html"  # Replace with your placeholder image URL
+            self.__show_image(content_frame, placeholder_image_url)
+
+        # Update the scroll region to enable scrolling
+        content_frame.update_idletasks()  # Ensure the content is fully rendered
+        canvas.config(scrollregion=canvas.bbox("all"))
 
     def __get_recipe(self, query):
         url = f"https://api.spoonacular.com/recipes/complexSearch?query={query}&apiKey={self.recipe_app_key}"
@@ -113,18 +142,18 @@ class RecipeApp:
             return response.json()
         return None
 
-    def __show_image(self, result_window, image_url):
+    def __show_image(self, frame, image_url):
         response = requests.get(image_url)
         img = Image.open(BytesIO(response.content))
         img = img.resize((RECIPE_IMAGE_WIDTH, RECIPE_IMAGE_HEIGHT))
         image = ImageTk.PhotoImage(img)
 
-        holder = Label(result_window, image=image)
+        holder = Label(frame, image=image)
         holder.photo = image  # Keep a reference to avoid garbage collection
         holder.grid(column=1, row=6, pady=10)
 
-    def __get_ingredients(self, result_window, recipe):
-        ingredients_text = Text(result_window, height=15, width=50, bg="#ffdada")
+    def __get_ingredients(self, frame, recipe):
+        ingredients_text = Text(frame, height=15, width=50, bg="#ffdada")
         ingredients_text.grid(column=1, row=4, pady=10)
         ingredients_text.delete("1.0", "end")
 
